@@ -231,12 +231,12 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
-*..Répondez à cet exercice ici..*
+* La perte du volume PVC entraîne la suppression de la base de données, ce qui provoque la perte définitive des données associées *
 
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-*..Répondez à cet exercice ici..*
+* Nous n’avons pas perdu les données lors de la suppression du PVC pra-data parce qu’un mécanisme de sauvegarde avait préalablement copié la base de données vers un autre volume persistant dédié aux backups. Ainsi, même si la base de production a été détruite, les données ont pu être restaurées à partir du PVC de sauvegarde grâce à la procédure de reprise.*
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
