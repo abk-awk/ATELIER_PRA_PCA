@@ -377,7 +377,7 @@ Contrôler que l’application fonctionne :
 kubectl get pods -n pra
 ```
 
-Voici le cron entier avec choix du point de terminaison 
+Voici le cron entier avec choix du point de restauration
 
 ```
 apiVersion: batch/v1
