@@ -318,6 +318,67 @@ Aujourd’hui nous restaurons “le dernier backup”. Nous souhaitons **ajouter
 
 *La restauration actuelle est limitée car elle sélectionne automatiquement la sauvegarde la plus récente. Pour permettre un vrai point de restauration, le Job a été modifié afin d’accepter un nom de fichier de backup en paramètre (BACKUP_FILE). Cela permet de restaurer un état précis de la base selon le besoin du PRA.*  
 
+** Etapes de restauration avec point de restauration connue **
+
+1️⃣ Vérifier que les backups existent
+
+Lister les sauvegardes présentes dans le volume /backup.
+
+```
+kubectl exec -it deploy/flask -n pra -- ls /backup
+```
+Exemple de sortie :
+```
+app-1772801221.db
+app-1772801161.db
+app-1772801100.db
+```
+Chaque fichier correspond à un point de restauration.
+
+2️⃣ Choisir le backup à restaurer
+
+Identifier le fichier correspondant au moment voulu.
+
+Exemple :
+
+```
+app-1772801161.db
+```
+3️⃣ Arrêter temporairement l’application (option recommandé)
+
+Pour éviter les écritures pendant la restauration :
+
+```
+kubectl scale deployment flask --replicas=0 -n pra
+```
+4️⃣ Lancer le Job de restauration
+
+Appliquer le Job Kubernetes qui restaure la base.
+
+```
+kubectl apply -f 50-job-restore.yaml 
+```
+5️⃣ Vérifier que la restauration est terminée
+Consulter les logs du Job :
+
+```
+kubectl logs job/sqlite-restore -n pra
+```
+6️⃣ Redémarrer l’application
+
+Relancer l’application pour utiliser la base restaurée.
+```
+kubectl scale deployment flask --replicas=1 -n pra
+```
+7️⃣ Vérifier l’état de l’application
+
+Contrôler que l’application fonctionne :
+```
+kubectl get pods -n pra
+```
+
+Voici le cron entier avec choix du point de terminaison 
+
 ```
 apiVersion: batch/v1
 kind: Job
