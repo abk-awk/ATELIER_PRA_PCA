@@ -231,7 +231,7 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
- * ➡️ Le PVC pra-backup :
+➡️ Le PVC pra-backup :
 Ce volume contient l’ensemble des sauvegardes historiques. S’il est supprimé en même temps que le volume de production (pra-data), aucune copie de sauvegarde ne reste disponible pour restaurer les données.
 
 ➡️ Le nœud physique ou virtuel unique :
