@@ -316,8 +316,55 @@ Difficulté : Moyenne (~2 heures)
 ### **Atelier 2 : Choisir notre point de restauration**  
 Aujourd’hui nous restaurons “le dernier backup”. Nous souhaitons **ajouter la capacité de choisir un point de restauration**.
 
-*..Décrir ici votre procédure de restauration (votre runbook)..*  
-  
+*La restauration actuelle est limitée car elle sélectionne automatiquement la sauvegarde la plus récente. Pour permettre un vrai point de restauration, le Job a été modifié afin d’accepter un nom de fichier de backup en paramètre (BACKUP_FILE). Cela permet de restaurer un état précis de la base selon le besoin du PRA.*  
+
+```
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sqlite-restore
+  namespace: pra
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: restore
+          image: alpine
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              if [ -n "$BACKUP_FILE" ]; then
+                FILE="/backup/$BACKUP_FILE"
+              else
+                FILE=$(ls -t /backup/*.db | head -1)
+              fi
+
+              if [ ! -f "$FILE" ]; then
+                echo "Erreur : backup introuvable"
+                ls -1 /backup
+                exit 1
+              fi
+
+              cp "$FILE" /data/app.db
+              echo "Restauration terminée depuis $FILE"
+          env:
+            - name: BACKUP_FILE
+              value: "app-1772801221.db"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: backup
+              mountPath: /backup
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pra-data
+        - name: backup
+          persistentVolumeClaim:
+            claimName: pra-backup
+```
+
 ---------------------------------------------------
 Evaluation
 ---------------------------------------------------
