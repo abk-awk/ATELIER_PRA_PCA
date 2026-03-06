@@ -231,22 +231,39 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
-* La perte du volume PVC entraîne la suppression de la base de données, ce qui provoque la perte définitive des données associées *
+ * ➡️ Le PVC pra-backup :
+Ce volume contient l’ensemble des sauvegardes historiques. S’il est supprimé en même temps que le volume de production (pra-data), aucune copie de sauvegarde ne reste disponible pour restaurer les données.
+
+➡️ Le nœud physique ou virtuel unique :
+Dans notre cas, K3d est exécuté dans un Codespace. Les deux volumes (pra-data et pra-backup) sont donc très probablement stockés sur le même disque physique. En cas de panne matérielle du serveur hôte, les données de production ainsi que les sauvegardes seraient perdues simultanément.
+
+➡️ Les données non encore sauvegardées :
+Le CronJob effectue une sauvegarde toutes les minutes. Par conséquent, toutes les données ajoutées entre deux exécutions (par exemple un message créé quelques secondes avant un crash) ne seront pas incluses dans la dernière sauvegarde et seront perdues. *
 
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-* Nous n’avons pas perdu les données lors de la suppression du PVC pra-data parce qu’un mécanisme de sauvegarde avait préalablement copié la base de données vers un autre volume persistant dédié aux backups. Ainsi, même si la base de production a été détruite, les données ont pu être restaurées à partir du PVC de sauvegarde grâce à la procédure de reprise.*
+* La récupération a été possible grâce à la redondance asynchrone mise en place.
+
+➡️ Les données sont stockées dans le volume persistant pra-data et non dans le Pod, ce qui permet de les conserver même si le Pod est recréé.
+➡️ Un CronJob effectue une sauvegarde du fichier SQLite toutes les minutes en le copiant du volume pra-data vers le volume de sauvegarde pra-backup.
+➡️ Lorsque pra-data a été supprimé, le volume pra-backup est resté intact. Le job 50-job-restore.yaml a alors permis de restaurer la dernière sauvegarde vers un nouveau volume pra-data.*
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
   
-*..Répondez à cet exercice ici..*
+*RPO : 1 minute
+Le CronJob effectuant une sauvegarde chaque minute, la perte maximale de données en cas de panne est limitée à 60 secondes.
+
+RTO : 4 à 8 minutes
+C’est le temps estimé pour remettre l’application en service : détection de l’incident, suppression des ressources corrompues, redéploiement de l’application et restauration des données. L’application peut ainsi être opérationnelle en moins de 10 minutes.*
 
 **Exercice 4 :**  
 Pourquoi cette solution (cet atelier) ne peux pas être utilisé dans un vrai environnement de production ? Que manque-t-il ?   
   
-*..Répondez à cet exercice ici..*
+*La solution présente plusieurs limites. Le stockage est local au cluster, ce qui crée un point de défaillance unique : si le cluster K3d ou le serveur tombe, les données de production et les sauvegardes sont perdues, d’autant plus que pra-data et pra-backup sont stockés au même endroit. De plus, les sauvegardes ne sont pas externalisées, alors qu’un vrai PRA exige un stockage hors site (ex. S3 ou autre région).
+
+Par ailleurs, l’utilisation de SQLite ne permet pas d’assurer une haute disponibilité, contrairement à des bases comme PostgreSQL ou MariaDB. Enfin, la restauration est manuelle et aucun système de monitoring n’alerte en cas d’échec du CronJob, ce qui augmente le risque d’erreur et réduit la fiabilité globale du dispositif*
   
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
