@@ -268,7 +268,36 @@ Par ailleurs, l’utilisation de SQLite ne permet pas d’assurer une haute disp
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-*..Répondez à cet exercice ici..*
+* L’architecture améliore la résilience et la continuité de service (PRA/PCA) en supprimant les points de défaillance uniques et en automatisant les opérations critiques.
+
+Base de données haute disponibilité
+SQLite est remplacée par PostgreSQL répliqué (Primary + Replica). Cela permet une réplication en temps réel et une bascule automatique si le serveur principal tombe.
+
+Stockage distribué
+Le stockage local est remplacé par un stockage distribué Kubernetes (ex : Longhorn, Ceph, OpenEBS) afin d’assurer la réplication des données entre plusieurs nœuds et éviter le SPOF.
+
+Sauvegardes hors site
+Les backups sont envoyés vers un stockage objet externe (S3, Azure Blob, GCS) via des outils comme Velero ou Restic pour garantir la protection en cas de panne totale du cluster.
+
+Restauration automatisée
+Les procédures de restauration sont automatisées via scripts, pipelines ou jobs Kubernetes, permettant une reconstruction rapide de l’infrastructure.
+
+Monitoring et alertes
+Un système d’observabilité avec Prometheus, Grafana et Alertmanager permet de surveiller les performances, détecter les incidents et envoyer des alertes.
+
+PRA multi-zone
+Un cluster secondaire dans une autre région peut être activé en cas de catastrophe pour assurer la continuité de service.
+
+Résultat
+
+RPO : quelques secondes
+
+RTO : environ 2 à 5 minutes
+
+Architecture hautement disponible, supervisée et tolérante aux pannes.*
+
+<img width="1536" height="1024" alt="ChatGPT Image Mar 6, 2026, 01_26_57 PM" src="https://github.com/user-attachments/assets/0b86c8e9-3a20-4c18-9076-9dd2569821cc" />
+
 
 ---------------------------------------------------
 Séquence 6 : Ateliers  
