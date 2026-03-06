@@ -243,7 +243,7 @@ Le CronJob effectue une sauvegarde toutes les minutes. Par conséquent, toutes l
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-* La récupération a été possible grâce à la redondance asynchrone mise en place.
+La récupération a été possible grâce à la redondance asynchrone mise en place.
 
 ➡️ Les données sont stockées dans le volume persistant pra-data et non dans le Pod, ce qui permet de les conserver même si le Pod est recréé.
 ➡️ Un CronJob effectue une sauvegarde du fichier SQLite toutes les minutes en le copiant du volume pra-data vers le volume de sauvegarde pra-backup.
@@ -268,7 +268,7 @@ Par ailleurs, l’utilisation de SQLite ne permet pas d’assurer une haute disp
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-* L’architecture améliore la résilience et la continuité de service (PRA/PCA) en supprimant les points de défaillance uniques et en automatisant les opérations critiques.
+*L’architecture améliore la résilience et la continuité de service (PRA/PCA) en supprimant les points de défaillance uniques et en automatisant les opérations critiques.
 
 Base de données haute disponibilité
 SQLite est remplacée par PostgreSQL répliqué (Primary + Replica). Cela permet une réplication en temps réel et une bascule automatique si le serveur principal tombe.
